@@ -33,7 +33,7 @@ def get_headers(token):
 
 
 def collect_coin(token, amount):
-    url = 'https://api-backend.yescoin.gold/game/collectCoin'
+    url = 'https://bi.yescoin.gold/game/collectCoin'
     headers = get_headers(token)
     data = json.dumps(amount)  # Ensure data is sent as JSON-encoded string
     try:
@@ -59,7 +59,7 @@ def collect_coin(token, amount):
 
 def fetch_account_info(token):
     try:
-        url = 'https://api-backend.yescoin.gold/account/getAccountInfo'
+        url = 'https://bi.yescoin.gold/account/getAccountInfo'
         headers = get_headers(token)
         response = session.get(url, headers=headers)
         response.raise_for_status()
@@ -74,7 +74,7 @@ def fetch_account_info(token):
 
 def fetch_game_info(token):
     try:
-        url = 'https://api-backend.yescoin.gold/game/getGameInfo'
+        url = 'https://bi.yescoin.gold/game/getGameInfo'
         headers = get_headers(token)
         response = session.get(url, headers=headers)
         response.raise_for_status()
@@ -88,7 +88,7 @@ def fetch_game_info(token):
 
 
 def use_special_box(token):
-    url = 'https://api-backend.yescoin.gold/game/recoverSpecialBox'
+    url = 'https://bi.yescoin.gold/game/recoverSpecialBox'
     headers = get_headers(token)
     try:
         response = session.post(url, headers=headers)
@@ -111,7 +111,7 @@ def use_special_box(token):
 
 def fetch_special_box_info(token):
     try:
-        url = 'https://api-backend.yescoin.gold/game/getSpecialBoxInfo'
+        url = 'https://bi.yescoin.gold/game/getSpecialBoxInfo'
         headers = get_headers(token)
         response = session.get(url, headers=headers)
         response.raise_for_status()
@@ -126,7 +126,7 @@ def fetch_special_box_info(token):
 
 def get_my_user_nick(token):
     try:
-        url = 'https://api-backend.yescoin.gold/account/getRankingList?index=1&pageSize=1&rankType=1&userLevel=1'
+        url = 'https://bi.yescoin.gold/account/getRankingList?index=1&pageSize=1&rankType=1&userLevel=1'
         headers = get_headers(token)
         response = session.get(url, headers=headers)
         response.raise_for_status()
@@ -140,7 +140,7 @@ def get_my_user_nick(token):
 
 
 def collect_from_special_box(token, box_type, coin_count):
-    url = 'https://api-backend.yescoin.gold/game/collectSpecialBoxCoin'
+    url = 'https://bi.yescoin.gold/game/collectSpecialBoxCoin'
     headers = get_headers(token)
     data = json.dumps({"boxType": box_type, "coinCount": coin_count})
     try:
@@ -186,7 +186,7 @@ def attempt_collect_special_box(token, box_type, initial_coin_count):
 
 def fetch_account_build_info(token):
     try:
-        url = 'https://api-backend.yescoin.gold/build/getAccountBuildInfo'
+        url = 'https://bi.yescoin.gold/build/getAccountBuildInfo'
         headers = get_headers(token)
         response = session.get(url, headers=headers)
         response.raise_for_status()
@@ -204,7 +204,7 @@ def fetch_account_build_info(token):
 
 
 def fetch_squad_info(token):
-    url = 'https://api-backend.yescoin.gold/squad/mySquad'
+    url = 'https://bi.yescoin.gold/squad/mySquad'
     headers = get_headers(token)
     try:
         response = session.get(url, headers=headers)
@@ -220,7 +220,7 @@ def fetch_squad_info(token):
 
 
 def join_squad(token, squad_link):
-    url = 'https://api-backend.yescoin.gold/squad/joinSquad'
+    url = 'https://bi.yescoin.gold/squad/joinSquad'
     headers = get_headers(token)
     data = json.dumps({"squadTgLink": squad_link})
     try:
@@ -237,7 +237,7 @@ def join_squad(token, squad_link):
 
 
 def recover_coin_pool(token):
-    url = 'https://api-backend.yescoin.gold/game/recoverCoinPool'
+    url = 'https://bi.yescoin.gold/game/recoverCoinPool'
     headers = get_headers(token)
     try:
         response = session.post(url, headers=headers)
@@ -259,7 +259,28 @@ def recover_coin_pool(token):
 
 
 def fetch_task_list(token):
-    url = 'https://api-backend.yescoin.gold/task/getCommonTaskList'
+    # url = 'https://bi.yescoin.gold/task/getCommonTaskList'
+    url = 'https://bi.yescoin.gold/task/getTaskList'
+    headers = get_headers(token)
+    try:
+        response = session.get(url, headers=headers)
+        response.raise_for_status()
+        tasks = response.json()
+        if tasks['code'] == 0:
+            # return tasks['data']
+            return tasks['data']['specialTaskList'] + tasks['data']['taskList']
+        else:
+            print(
+                f"{Fore.RED + Style.BRIGHT}\r[ Task ] : Failed to get task list: {tasks['message']}",
+                flush=True)
+            return None
+    except Exception as e:
+        print(f"{Fore.RED + Style.BRIGHT}Error: {e}")
+        return None
+
+
+def fetch_daily(token):
+    url = 'https://bi.yescoin.gold/mission/getDailyMission'
     headers = get_headers(token)
     try:
         response = session.get(url, headers=headers)
@@ -278,7 +299,7 @@ def fetch_task_list(token):
 
 
 def finish_task(token, task_id):
-    url = 'https://api-backend.yescoin.gold/task/finishTask'
+    url = 'https://bi.yescoin.gold/task/finishTask'
     headers = get_headers(token)
     data = json.dumps(task_id)
     try:
@@ -302,6 +323,78 @@ def finish_task(token, task_id):
         return False
 
 
+def click_daily_mission(token, task_id):
+    url = 'https://bi.yescoin.gold/mission/clickDailyMission'
+    headers = get_headers(token)
+    data = json.dumps(task_id)
+    try:
+        response = session.post(url, headers=headers, data=data)
+        response.raise_for_status()
+        result = response.json()
+
+        if result['code'] == 0:
+            return True
+        else:
+            print(
+                f"{Fore.RED + Style.BRIGHT}\r[ Task ] : Failed to finish task {task_id}: {result['message']}",
+                flush=True)
+            return False
+    except Exception as e:
+        print(f"{Fore.RED + Style.BRIGHT}\r[ Task ] : Error: {e}", flush=True)
+        return False
+
+def check_daily_mission(token, task_id):
+    if(click_daily_mission(token, task_id)):
+        url = 'https://bi.yescoin.gold/mission/checkDailyMission'
+        headers = get_headers(token)
+        data = json.dumps(task_id)
+        try:
+            response = session.post(url, headers=headers, data=data)
+            response.raise_for_status()
+            result = response.json()
+
+            if result['code'] == 0:
+                return True
+            else:
+                print(
+                    f"{Fore.RED + Style.BRIGHT}\r[ Task ] : Failed to finish task {task_id}: {result['message']}",
+                    flush=True)
+                return False
+        except Exception as e:
+            print(f"{Fore.RED + Style.BRIGHT}\r[ Task ] : Error: {e}", flush=True)
+            return False
+    else:
+        print(f"{Fore.RED + Style.BRIGHT}\r[ Check Daily ] : Error: not success daily mission", flush=True)
+        return False
+
+def finish_daily(token, task_id):
+    # if(check_daily_mission(token, task_id)):
+    url = 'https://bi.yescoin.gold/mission/claimReward'
+    headers = get_headers(token)
+    data = json.dumps(task_id)
+    try:
+        response = session.post(url, headers=headers, data=data)
+        response.raise_for_status()
+        result = response.json()
+
+        if result['code'] == 0:
+            print(
+                f"{Fore.GREEN + Style.BRIGHT}\r[ Daily ] : Mission {task_id} finished. Bonus: {result['data']['reward']}",
+                flush=True)
+            return True
+        else:
+            # print(result)
+            print(
+                f"{Fore.RED + Style.BRIGHT}\r[ Daily ] : Failed to finish mission {task_id}: {result['message']}",
+                flush=True)
+            return False
+    except Exception as e:
+        print(f"{Fore.RED + Style.BRIGHT}\r[ Daily ] : Error: {e}", flush=True)
+        return False
+    # else:
+    #     print(f"{Fore.RED + Style.BRIGHT}\r[ Click Mission ] : Error: failed check mission", flush=True)
+
+
 def process_tasks(token):
     tasks = fetch_task_list(token)
     if tasks:
@@ -315,12 +408,25 @@ def process_tasks(token):
                     flush=True)
 
 
+def process_daily(token):
+    tasks = fetch_daily(token)
+    if tasks:
+        for task in tasks:
+            time.sleep(1)
+            if task['missionStatus'] == 0:  # Jika tugas belum diklaim
+                finish_daily(token, task['missionId'])
+            else:
+                print(
+                    f"{random.choice(available_colors)+Style.BRIGHT}\r[ Daily ] : Mission already finished          ",
+                    flush=True)
+
+
 import random
 
 
 def upgrade_level(token, current_level, target_level, upgrade_type):
 
-    url = 'https://api-backend.yescoin.gold/build/levelUp'
+    url = 'https://bi.yescoin.gold/build/levelUp'
     headers = get_headers(token)
     data = json.dumps(upgrade_type)
     if upgrade_type == '1':
@@ -352,7 +458,7 @@ def upgrade_level(token, current_level, target_level, upgrade_type):
 
 
 def main():
-
+    daily = 0
     while True:
         tokens = load_tokens('tokens.txt')
 
@@ -407,12 +513,14 @@ def main():
                 print(
                     f"{random.choice(available_colors)+Style.BRIGHT}\r[ Fill Rate ] : Level {coin_pool_recovery_speed}",
                     flush=True)
-            if cek_task_enable == 'y':
+            if cek_task_enable == 'y' and daily == 0:
                 print(
                     f"{random.choice(available_colors)+Style.BRIGHT}\r[ Task ] : Trying to finish task..",
                     end="",
                     flush=True)
                 process_tasks(token)
+
+                process_daily(token)
             time.sleep(1)
             if upgrade_multi_enable == 'y':
                 print(
@@ -521,7 +629,7 @@ def main():
                 flush=True)
             collected_amount = attempt_collect_special_box(token, 1, 200)
             time.sleep(1)
-
+        daily = 1
         print(
             f"\n{random.choice(available_colors)+Style.BRIGHT}========={Fore.WHITE+Style.BRIGHT}Semua akun berhasil di proses{Fore.GREEN+Style.BRIGHT}=========",
             end="",
@@ -561,7 +669,7 @@ def parse_arguments():
                         help='Level maksimum untuk upgrade (default: 5)')
 
     args = parser.parse_args()
-    args.task = 'n'
+    args.task = 'y'
     args.multi = 'n'
     args.fill = 'n'
 

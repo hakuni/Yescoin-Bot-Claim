@@ -345,6 +345,7 @@ def click_daily_mission(token, task_id):
 
 def check_daily_mission(token, task_id):
     if(click_daily_mission(token, task_id)):
+        time.sleep(1)
         url = 'https://bi.yescoin.gold/mission/checkDailyMission'
         headers = get_headers(token)
         data = json.dumps(task_id)
@@ -368,31 +369,32 @@ def check_daily_mission(token, task_id):
         return False
 
 def finish_daily(token, task_id):
-    # if(check_daily_mission(token, task_id)):
-    url = 'https://bi.yescoin.gold/mission/claimReward'
-    headers = get_headers(token)
-    data = json.dumps(task_id)
-    try:
-        response = session.post(url, headers=headers, data=data)
-        response.raise_for_status()
-        result = response.json()
+    if(check_daily_mission(token, task_id)):
+        time.sleep(1)
+        url = 'https://bi.yescoin.gold/mission/claimReward'
+        headers = get_headers(token)
+        data = json.dumps(task_id)
+        try:
+            response = session.post(url, headers=headers, data=data)
+            response.raise_for_status()
+            result = response.json()
 
-        if result['code'] == 0:
-            print(
-                f"{Fore.GREEN + Style.BRIGHT}\r[ Daily ] : Mission {task_id} finished. Bonus: {result['data']['reward']}",
-                flush=True)
-            return True
-        else:
-            # print(result)
-            print(
-                f"{Fore.RED + Style.BRIGHT}\r[ Daily ] : Failed to finish mission {task_id}: {result['message']}",
-                flush=True)
+            if result['code'] == 0:
+                print(
+                    f"{Fore.GREEN + Style.BRIGHT}\r[ Daily ] : Mission {task_id} finished. Bonus: {result['data']['reward']}",
+                    flush=True)
+                return True
+            else:
+                # print(result)
+                print(
+                    f"{Fore.RED + Style.BRIGHT}\r[ Daily ] : Failed to finish mission {task_id}: {result['message']}",
+                    flush=True)
+                return False
+        except Exception as e:
+            print(f"{Fore.RED + Style.BRIGHT}\r[ Daily ] : Error: {e}", flush=True)
             return False
-    except Exception as e:
-        print(f"{Fore.RED + Style.BRIGHT}\r[ Daily ] : Error: {e}", flush=True)
-        return False
-    # else:
-    #     print(f"{Fore.RED + Style.BRIGHT}\r[ Click Mission ] : Error: failed check mission", flush=True)
+    else:
+        print(f"{Fore.RED + Style.BRIGHT}\r[ Click Mission ] : Error: failed check mission", flush=True)
 
 
 def process_tasks(token):
